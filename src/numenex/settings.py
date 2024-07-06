@@ -1,14 +1,22 @@
 from configparser import ConfigParser
-from .misc import Role
+from enum import Enum
+import os
+
+
+class Role(Enum):
+    Miner = "miner"
+    Validator = "validator"
 
 
 class Config:
-    def __init__(self, file: str, type: Role) -> None:
-        if file in None:
-            file = "config.ini"
+    def __init__(self, type: Role) -> None:
+        file = "config.ini"
         parser = ConfigParser()
         parser.read(file)
         if type == Role.Miner:
             self.miner = {"key": parser.get("miner", "key_name")}
         else:
-            self.validator = {"key": parser.get("validator", "key_name")}
+            self.validator = {
+                "key": parser.get("validator", "key_name"),
+                "interval": parser.get("validator", "interval"),
+            }
