@@ -24,7 +24,7 @@ comx key create key_name
 ```
 
 ## Setup config file
-Create `config.ini` file from config.ini.example with your actual key name 
+Create `config.ini` file from `config.ini.example` with your actual key name 
 
 
 ## Running the Miner
@@ -38,6 +38,7 @@ poetry run python -m src.numenex.miner.trade
 
 ## Running the Validator
 Complete all above steps before you run validator
+
 Run the validator:
 
 ```bash
