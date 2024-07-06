@@ -1,5 +1,6 @@
 [miner]
-key_name = miner_key_name
+key_name = test_miner [miner key name in ~/.commune/key/]
 
 [validator]
-key_name = validator_key_name
+key_name = test_numx_validator [validator key name in ~/.commune/key/]
+interval = 20
