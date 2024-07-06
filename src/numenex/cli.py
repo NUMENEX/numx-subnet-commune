@@ -13,17 +13,22 @@ app = typer.Typer()
 
 @app.command("serve-subnet")
 def serve():
-    # keypair = classic_load_key(commune_key)  # type: ignore
-    c_client = CommuneClient(get_node_url(use_testnet=True))
     config = Config(Role.Validator)
-    # subnet_uid = get_subnet_netuid("your-subnet-name")
+    use_testnet: Annotated[bool, "Whether to use testnet or not"] = (
+        config.subnet.get("use_testnet") == "True"
+    )
+    c_client = CommuneClient(get_node_url(use_testnet=use_testnet))
+    keypair = classic_load_key(config.validator.get("key"))
+    call_timeout = config.subnet.get("call_timeout")
+    max_allowed_weights = int(config.subnet.get("max_allowed_weights"))
     validator = NumxValidator(
-        key=classic_load_key(config.validator["key"]),
+        key=keypair,
         client=c_client,
-        netuid=1,
+        netuid=config.subnet.get("netuid"),
+        call_timeout=call_timeout,
         config=config,
     )
-    validator.validation_loop()
+    validator.validation_loop(max_allowed_weights)
 
 
 if __name__ == "__main__":

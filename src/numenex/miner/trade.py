@@ -20,8 +20,25 @@ class NumenexTradeModule(Module):
             )
 
     @endpoint
-    def test(self):
-        return {"message": "Test successful"}
+    def trades(self):
+        return {
+            "trades": [
+                {
+                    "pair": "BTC/USDT",
+                    "price": 10000.0,
+                    "amount": 1.0,
+                    "side": "buy",
+                    "timestamp": 1623240000,
+                },
+                {
+                    "pair": "ETH/USDT",
+                    "price": 300.0,
+                    "amount": 2.0,
+                    "side": "sell",
+                    "timestamp": 1623240000,
+                },
+            ]
+        }
 
 
 if __name__ == "__main__":
@@ -30,8 +47,11 @@ if __name__ == "__main__":
     miner = NumenexTradeModule()
     server = ModuleServer(miner, keypair, use_testnet=True)
     app = server.get_fastapi_app()
+    host = config.miner["host"]
+    port = config.miner["port"]
+    print(host, port)
     server_process = multiprocessing.Process(
-        target=uvicorn.run(app, host="0.0.0.0", port=8000)
+        target=uvicorn.run(app, host=host, port=int(port))
     )
     try:
         server_process.start()

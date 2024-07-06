@@ -1,6 +1,14 @@
 [miner]
 key_name = test_miner [miner key name in ~/.commune/key/]
+host=0.0.0.0
+port=8000
 
 [validator]
-key_name = test_numx_validator [validator key name in ~/.commune/key/]
+key_name = test_validator [validator key name in ~/.commune/key/]
 interval = 20
+
+[subnet]
+use_testnet = True
+netuid = 35
+call_timeout = 10
+max_allowed_weights = 420
