@@ -1,0 +1,5 @@
+[miner]
+key_name = miner_key_name
+
+[validator]
+key_name = validator_key_name
