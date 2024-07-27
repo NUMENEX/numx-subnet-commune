@@ -1,6 +1,5 @@
 from configparser import ConfigParser
 from enum import Enum
-import os
 
 
 class Role(Enum):
