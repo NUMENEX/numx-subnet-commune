@@ -9,6 +9,10 @@ import asyncio
 from loguru import logger
 from functools import partial
 import concurrent.futures
+from ..numenex import NumenexTradeModule, Trade
+from ..settings import Role
+import typing as ty
+import math
 
 import re
 
@@ -20,10 +24,7 @@ IP_REGEX = re.compile(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+")
 
 
 def set_weights(
-    score_dict: dict[
-        int, float
-    ],  # implemented as a float score from 0 to 1, one being the best
-    # you can implement your custom logic for scoring
+    score_dict: dict[int, ty.Union[float, ty.List[str]]],
     netuid: int,
     client: CommuneClient,
     key: Keypair,
@@ -50,9 +51,9 @@ def set_weights(
 
     # process the scores into weights of type dict[int, int]
     # Iterate over the items in the score_dict
-    for uid, score in score_dict.items():
+    for uid, score_data in score_dict.items():
         # Calculate the normalized weight as an integer
-        weight = int(score * 1000 / scores)
+        weight = int(score_data["score"] * 1000 / scores)
 
         # Add the weighted score to the new dictionary
         weighted_scores[uid] = weight
@@ -66,6 +67,8 @@ def set_weights(
     logger.info(f"weights for the following uids: {uids}")
     if len(uids) > 0:
         client.vote(key=key, uids=uids, weights=weights, netuid=netuid)
+
+    # TODO:: update numenex db for user incentives
 
 
 def extract_address(string: str):
@@ -144,11 +147,14 @@ def cut_to_max_allowed_weights(
     Returns:
         A dictionary mapping miner UIDs to their scores, where the scores have been cut to the maximum allowed weights.
     """
+    max_allowed_miners = math.ceil(len(score_dict) // 2)
     # sort the score by highest to lowest
-    sorted_scores = sorted(score_dict.items(), key=lambda x: x[1], reverse=True)
+    sorted_scores = sorted(
+        score_dict.items(), key=lambda x: x[1]["score"], reverse=True
+    )
 
     # cut to max_allowed_weights
-    cut_scores = sorted_scores[:max_allowed_weights]
+    cut_scores = sorted_scores[:max_allowed_miners]
 
     return dict(cut_scores)
 
@@ -194,14 +200,14 @@ class NumxValidator(Module):
             miner_answer = None
         return miner_answer
 
-    def _score_miner(self, miner_answer: str | None) -> float:
+    def _score_miner(self, trade: Trade) -> float:
         # Implement your custom scoring logic here
-        if not miner_answer:
-            return 0
-
-        return 0.5
+        if trade.token_price_on_prediction_day != 0:
+            diff = trade.closeness_value / trade.token_price_on_prediction_day
+            return 1 - diff
 
     async def validate_step(self, netuid: int, max_allowed_weights: int) -> None:
+        numenex_module = NumenexTradeModule(Role.Validator, "trades")
         modules_adresses = get_modules(self.client, netuid)
         modules_keys = self.client.query_map_key(netuid)
         val_ss58 = self.key.ss58_address
@@ -210,35 +216,46 @@ class NumxValidator(Module):
         modules_info: dict[int, tuple[list[str], Ss58Address]] = {}
 
         modules_filtered_address = get_ip_port(modules_adresses)
-        score_dict: dict[int, float] = {}
-
-        for module_id in modules_keys.keys():
-            module_addr = modules_filtered_address.get(module_id, None)
-            if not module_addr:
-                continue
-            modules_info[module_id] = (module_addr, modules_keys[module_id])
-        get_miner_trades = partial(self._get_miner_trades)
-        logger.info(f"Selected the following miners: {modules_info.keys()}")
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-            it = executor.map(get_miner_trades, modules_info.values())
-            miner_answers = [*it]
-
-        for uid, miner_response in zip(modules_info.keys(), miner_answers):
-            miner_answer = miner_response
-            if not miner_answer:
-                logger.info(f"Skipping miner {uid} that didn't answer")
-                continue
-
-            score = self._score_miner(miner_answer)
-            time.sleep(0.5)
-            # score has to be lower or eq to 1, as one is the best score, you can implement your custom logic
-            assert score <= 1
-            score_dict[uid] = score
-
-        if not score_dict:
-            logger.info("No miner managed to give a valid answer")
+        score_dict: dict[int, dict[float, ty.Union[float, ty.List[str]]]] = {}
+        trades: ty.List[Trade] = numenex_module.get_trades()
+        if len(trades) == 0:
+            logger.info("No trades found")
             return None
+
+        # else:
+
+        #     for module_id in modules_keys.keys():
+        #         module_addr = modules_filtered_address.get(module_id, None)
+        #         if not module_addr:
+        #             continue
+        #         modules_info[module_id] = (module_addr, modules_keys[module_id])
+        #     get_miner_trades = partial(self._get_miner_trades)
+        #     logger.info(f"Selected the following miners: {modules_info.keys()}")
+
+        #     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        #         it = executor.map(get_miner_trades, modules_info.values())
+        #         miner_answers = [*it]
+
+        #     for uid, miner_response in zip(modules_info.keys(), miner_answers):
+        #         miner_answer = miner_response
+        #         if not miner_answer:
+        #             logger.info(f"Skipping miner {uid} that didn't answer")
+        #             continue
+        for trade in trades:
+            score = self._score_miner(trade)
+            assert score <= 1
+            if trade.module_id in score_dict:
+                score_dict[int(trade.module_id)]["score"] += score
+                score_dict[int(trade.module_id)]["trade_id"].append(trade.id)
+            else:
+                score_dict[int(trade.module_id)] = {
+                    "score": score,
+                    "trade_id": [trade.id],
+                }
+
+            if not score_dict:
+                logger.info("No any transaction mined by miners")
+                return None
 
         _ = set_weights(
             score_dict, self.netuid, self.client, self.key, max_allowed_weights
