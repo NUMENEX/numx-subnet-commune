@@ -49,7 +49,6 @@ if __name__ == "__main__":
     app = server.get_fastapi_app()
     host = config.miner["host"]
     port = config.miner["port"]
-    print(host, port)
     server_process = multiprocessing.Process(
         target=uvicorn.run(app, host=host, port=int(port))
     )
