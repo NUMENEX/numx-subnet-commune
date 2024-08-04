@@ -8,8 +8,7 @@ from datetime import datetime
 import asyncio
 from loguru import logger
 from functools import partial
-import concurrent.futures
-from ..numenex import NumenexTradeModule, Trade
+from ..numenex import NumenexQAModule
 from ..settings import Role
 import typing as ty
 import math
@@ -207,19 +206,19 @@ class NumxValidator(Module):
             return 1 - diff
 
     async def validate_step(self, netuid: int, max_allowed_weights: int) -> None:
-        numenex_module = NumenexTradeModule(Role.Validator, "trades")
+        numenex_module = NumenexQAModule(Role.Validator)
         modules_adresses = get_modules(self.client, netuid)
         modules_keys = self.client.query_map_key(netuid)
         val_ss58 = self.key.ss58_address
         if val_ss58 not in modules_keys.values():
             raise RuntimeError(f"validator key {val_ss58} is not registered in subnet")
         modules_info: dict[int, tuple[list[str], Ss58Address]] = {}
-
+        answers = numenex_module.get_answers(path="answers")
         modules_filtered_address = get_ip_port(modules_adresses)
         score_dict: dict[int, dict[float, ty.Union[float, ty.List[str]]]] = {}
-        trades: ty.List[Trade] = numenex_module.get_trades()
-        if len(trades) == 0:
-            logger.info("No trades found")
+        # trades: ty.List[Trade] = numenex_module.get_trades()
+        if len(answers) == 0:
+            logger.info("No answers found")
             return None
 
         # else:
