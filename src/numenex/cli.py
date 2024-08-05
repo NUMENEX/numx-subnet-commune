@@ -7,6 +7,7 @@ from communex.client import CommuneClient
 from communex.compat.key import classic_load_key
 from .validator.validator import NumxValidator
 from .settings import Config, Role
+from .numenex import NumenexQAModule
 
 app = typer.Typer()
 
@@ -15,17 +16,15 @@ app = typer.Typer()
 def serve():
     config = Config(Role.Validator)
     use_testnet: Annotated[bool, "Whether to use testnet or not"] = (
-        config.subnet.get("use_testnet") == "True"
+        config["subnet"]["use_testnet"] == "True"
     )
     c_client = CommuneClient(get_node_url(use_testnet=use_testnet))
-    keypair = classic_load_key(config.validator.get("key"))
-    call_timeout = config.subnet.get("call_timeout")
-    max_allowed_weights = int(config.subnet.get("max_allowed_weights"))
+    keypair = classic_load_key(config["validator"]["key"])
+    max_allowed_weights = int(config["subnet"]["max_allowed_weights"])
     validator = NumxValidator(
         key=keypair,
         client=c_client,
-        netuid=config.subnet.get("netuid"),
-        call_timeout=call_timeout,
+        netuid=config["subnet"]["netuid"],
         config=config,
     )
     validator.validation_loop(max_allowed_weights)

@@ -23,6 +23,8 @@ class Config(dict):
             self["validator"] = {
                 "key": parser.get("validator", "key_name"),
                 "interval": parser.get("validator", "interval"),
+                "host": parser.get("miner", "host"),
+                "port": parser.get("miner", "port"),
             }
         self["subnet"] = {
             "netuid": parser.get("subnet", "netuid"),

@@ -22,7 +22,19 @@ def main():
                 "supporting_resources": {},
             }
         ]
-        numenex_module.answer_questions(data=data, path="answers")
+        answers = [
+            {
+                "question_id": "26e34ba9-4e0d-46ab-8f8e-820fce3f5e76",
+                "answer": "answer 1 of 1",
+                "supporting_resources": {},
+            },
+            {
+                "question_id": "1d990f08-77f7-4278-ae1c-5b1bb5232be7",
+                "answer": "answer 1 of 2",
+                "supporting_resources": {},
+            },
+        ]
+        numenex_module.answer_questions(method="post", data=answers, path="answers")
 
 
 if __name__ == "__main__":

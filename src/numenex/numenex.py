@@ -43,7 +43,7 @@ class NumenexQAModule:
         response = requests.get(f"{self.config['host']}:{self.config['port']}/{path}")
         print(response.json())
 
-    def answer_questions(self, data: ty.List[Answer], path: str):
+    def answer_questions(self, method: str, data: ty.List[Answer], path: str):
         key_pair = classic_load_key(self.config["key"])
         nonce = datetime.now().timestamp() * 1000
         address = key_pair.ss58_address
@@ -54,11 +54,18 @@ class NumenexQAModule:
             "signature": signature,
         }
         try:
-            response = requests.post(
-                f"{self.config['host']}:{self.config['port']}/{path}",
-                headers=headers,
-                json=data,
-            )
+            if method == "post":
+                response = requests.post(
+                    f"{self.config['host']}:{self.config['port']}/{path}",
+                    headers=headers,
+                    json=data,
+                )
+            else:
+                response = requests.patch(
+                    f"{self.config['host']}:{self.config['port']}/{path}",
+                    headers=headers,
+                    json=data,
+                )
             print(response.json())
             if response.status_code == 200:
                 return response.json()
@@ -72,13 +79,6 @@ class NumenexQAModule:
         response = requests.get(f"{self.config['host']}:{self.config['port']}/{path}")
         print(response.json())
 
-    def validate_step(self, netuid: int, max_allowed_weights: int):
-        score_datas = {1: 0.5}
-        score_dict = {}
-        for key, value in score_datas.items():
-            score_dict[key]["score"] += value
-        return score_dict
-
     def set_weights(
         self,
         score_dict: dict[int, ty.Union[str, float]],
@@ -91,7 +91,7 @@ class NumenexQAModule:
         score_dict = self.cut_to_max_allowed_weights(score_dict, max_allowed_weights)
         weighted_scores: dict[int, int] = {}
 
-        scores = sum(score_dict.values())
+        scores = sum(value["score"] for value in score_dict.values())
 
         # process the scores into weights of type dict[int, int]
         # Iterate over the items in the score_dict
@@ -110,12 +110,16 @@ class NumenexQAModule:
         # send the blockchain call
         print(f"weights for the following uids: {uids}")
         if len(uids) > 0:
-            client.vote(key=key, uids=uids, weights=weights, netuid=netuid)
+            receit = client.vote(key=key, uids=uids, weights=weights, netuid=netuid)
+            print(receit)
 
     def cut_to_max_allowed_weights(
         self, score_dict: dict[int, float], max_allowed_weights: int
     ) -> dict[int, float]:
-        max_allowed_miners = math.ceil(len(score_dict) // 2)
+        max_allowed_miners = math.ceil(
+            (len(score_dict) if len(score_dict) % 2 == 0 else (len(score_dict) + 1))
+            // 2
+        )
         # sort the score by highest to lowest
         sorted_scores = sorted(
             score_dict.items(), key=lambda x: x[1]["score"], reverse=True

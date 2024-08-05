@@ -33,7 +33,7 @@ After completing above steps
 Run the miner:
 
 ```bash
-poetry run python -m src.numenex.miner.trade
+poetry run python -m src.numenex.miner.numx [options]
 ```
 
 ## Running the Validator
@@ -42,5 +42,5 @@ Complete all above steps before you run validator
 Run the validator:
 
 ```bash
-poetry run python -m src.numenex.cli
+poetry run python -m src.numenex.validator.numx [options] 
 ```
