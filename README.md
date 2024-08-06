@@ -1,46 +1,42 @@
-
 # NUMENEX SUBNET
-
-## Setup Project
-
+## Setup project
 1. Clone project
-
 ```bash
-git clone git@github.com:NUMENEX/numx-subnet-commune.git
+git clone https://github.com/NUMENEX/numx-subnet-commune.git
+cd numx-subnet-commune
 ```
-
 2. Install the required dependencies:
 
 ```bash
 poetry install
 ```
+3. Setup Wallet
 
-## Setup Wallet
-
-Use [communex](https://github.com/agicommies/communex) package to create wallet
+Use [communex](https://github.com/agicommies/communex) cli to create wallet and make sure you fund them
 
 ```bash
 comx key create key_name
 ```
-
-## Setup config file
+4. Setup config file
 Create `config.ini` file from `config.ini.example` with your actual key name 
 
 
-## Running the Miner
-After completing above steps
+## Running Miner
 
-Run the miner:
+To run Miner, make sure you have completed the above steps from `1 to 4`
 
 ```bash
 poetry run python -m src.numenex.miner.numx [options]
 ```
+There are two options, `get_questions` and `answer_questions`
+There are examples given in code please go through it.
 
-## Running the Validator
-Complete all above steps before you run validator
+## Running Validator
 
-Run the validator:
+To run Validator, make sure you have completed the above steps from `1 to 4`
 
 ```bash
-poetry run python -m src.numenex.validator.numx [options] 
+poetry run python -m src.numenex.validator.numx [options]
 ```
+There are two options, `get_answers` and `validate_and_update_answers`
+There are examples given in code please go through it.
