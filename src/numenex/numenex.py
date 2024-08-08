@@ -116,10 +116,13 @@ class NumenexQAModule:
     def cut_to_max_allowed_weights(
         self, score_dict: dict[int, float], max_allowed_weights: int
     ) -> dict[int, float]:
-        max_allowed_miners = math.ceil(
-            (len(score_dict) if len(score_dict) % 2 == 0 else (len(score_dict) + 1))
-            // 2
-        )
+        if (len(score_dict)) >= max_allowed_weights:
+            max_allowed_miners = math.ceil(
+                (len(score_dict) if len(score_dict) % 2 == 0 else (len(score_dict) + 1))
+                // 2
+            )
+        else:
+            max_allowed_miners = len(score_dict)
         # sort the score by highest to lowest
         sorted_scores = sorted(
             score_dict.items(), key=lambda x: x[1]["score"], reverse=True
