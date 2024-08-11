@@ -24,19 +24,24 @@ Create `config.ini` file from `config.ini.example` with your actual key name
 ## Running Miner
 
 To run Miner, make sure you have completed the above steps from `1 to 4`
-
+1. Using User Interface
 ```bash
-poetry run python -m src.numenex.miner.numx [options]
+poetry run python -m src.numenex.miner.numx
 ```
-There are two options, `get_questions` and `answer_questions`
-There are examples given in code please go through it.
+After you have verified the server is running, please go [Here](https://github.com/NUMENEX/QA-UI) and you can start mining using our basic UI.
+
+2. Using CLI
+Checkout to feat/initial_phase and follow it's readme or go [Here](https://github.com/NUMENEX/numx-subnet-commune/tree/feat/initial_phase) and follow Readme file
 
 ## Running Validator
 
 To run Validator, make sure you have completed the above steps from `1 to 4`
 
+1. Using User Interface
 ```bash
-poetry run python -m src.numenex.validator.numx [options]
+poetry run python -m src.numenex.validator.numx
 ```
-There are two options, `get_answers` and `validate_and_update_answers`
-There are examples given in code please go through it.
+After you have verified the server is running, please go [Here](https://github.com/NUMENEX/QA-UI) and you can start validating using our basic UI.
+
+2. Using CLI
+Checkout to feat/initial_phase and follow it's readme or go [Here](https://github.com/NUMENEX/numx-subnet-commune/tree/feat/initial_phase) and follow Readme file
