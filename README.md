@@ -20,15 +20,26 @@ comx key create key_name
 4. Setup config file
 Create `config.ini` file from `config.ini.example` with your actual key name 
 
+5. Register Miner/Validtor Module on Numenex Subnet
 
-## Running Miner
+    **Registering Miner**
+    
+    <mark>Remember ip and port args are for identifying miner and validator for now, you can put 0.0.0.0 for ip and 8000 for port</mark>
 
-To run Miner, make sure you have completed the above steps from `1 to 4`
-### Register Miner Module on Numenex Subnet
-<mark>Remember ip and port args are for identifying miner and validator for now, you can put 0.0.0.0 for ip and 8000 for port</mark>
     ```bash
     comx module register <name> <your_commune_key> --ip <your-ip-address> --port <port> --netuid <Numenex netuid>
     ```
+    **Registering Validator**
+    
+    ```bash
+    comx module register <name> <your_commune_key> --netuid <Numenex netuid>
+    ```
+    
+
+
+## Running Miner
+
+To run Miner, make sure you have completed the above steps from `1 to 5`
 1. **Using User Interface:**
     ```bash
     poetry run python -m src.numenex.miner.numx
@@ -40,11 +51,8 @@ To run Miner, make sure you have completed the above steps from `1 to 4`
 
 ## Running Validator
 
-To run Validator, make sure you have completed the above steps from `1 to 4`
-### Register Miner Module on Numenex Subnet
-    ```bash
-    comx module register <name> <your_commune_key> --netuid <Numenex netuid>
-    ```
+To run Validator, make sure you have completed the above steps from `1 to 5`
+
 1. **Using User Interface:**
     ```bash
     poetry run python -m src.numenex.validator.numx
