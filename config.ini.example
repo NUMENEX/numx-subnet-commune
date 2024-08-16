@@ -1,16 +1,16 @@
 [miner]
-key_name = test_miner [miner key name in ~/.commune/key/]
-host=0.0.0.0
-port=8000
+key_name = test_miner
+host=http://165.232.173.89
+port=80
 
 [validator]
-key_name = test_validator [validator key name in ~/.commune/key/]
 interval = 20
-host=0.0.0.0
-port=8000
+host=http://165.232.173.89
+port=80
+key_name = test_validator
 
 [subnet]
-use_testnet = True
-netuid = 35
+use_testnet = False
+netuid = 19
 call_timeout = 10
 max_allowed_weights = 420
