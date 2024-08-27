@@ -26,6 +26,16 @@ class Config(dict):
                 "host": parser.get("miner", "host"),
                 "port": parser.get("miner", "port"),
             }
+
+            self["llm_validator"] = {
+                "openai_api_key": parser.get("llm_validator", "openai_api_key"),
+                "openai_model": parser.get("llm_validator", "openai_model"),
+                "openai_temperature": parser.get("llm_validator", "openai_temperature"),
+                "openai_max_tokens": parser.get("llm_validator", "openai_max_tokens"),
+                "openai_timeout": parser.get("llm_validator", "openai_timeout"),
+                "openai_max_retries": parser.get("llm_validator", "openai_max_retries"),
+                "api_ninja_api_key": parser.get("llm_validator", "api_ninja_api_key"),
+            }
         self["subnet"] = {
             "netuid": parser.get("subnet", "netuid"),
             "use_testnet": parser.get("subnet", "use_testnet"),

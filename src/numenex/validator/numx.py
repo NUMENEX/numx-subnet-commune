@@ -1,87 +1,54 @@
 from ..numenex import NumenexQAModule
 from ..settings import Role, Config
-from typing import Annotated
-from communex._common import get_node_url
-from communex.compat.key import classic_load_key
-from communex.client import CommuneClient
-import argparse
+import time
+from .miner_verifier.main import get_result
+import os
+
+import logging
+from logging.handlers import RotatingFileHandler
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[
+        RotatingFileHandler("app.log", maxBytes=1000000, backupCount=5),
+        logging.StreamHandler(),
+    ],
+)
+os.environ["USER_AGENT"] = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Validator system for QA")
-    parser.add_argument(
-        "question_answer_function",
-        type=str,
-        choices=["get_answers", "validate_and_update_answers"],
-        help="The function to execute",
-    )
-    numenex_module = NumenexQAModule(role=Role.Validator)
-    if parser.parse_args().question_answer_function == "get_answers":
-        numenex_module.get_answers(path="answers")
-    elif parser.parse_args().question_answer_function == "validate_and_update_answers":
+    logger = logging.getLogger(__name__)
+    logger.info("Validator started")
+    while True:
+        numenex_module = NumenexQAModule(role=Role.Validator)
+        answers = numenex_module.get_answers(path="answers")
         config = Config(Role.Validator)
-        use_testnet: Annotated[bool, "Whether to use testnet or not"] = (
-            config["subnet"]["use_testnet"] == "True"
-        )
-        c_client = CommuneClient(get_node_url(use_testnet=use_testnet))
-        keypair = classic_load_key(config["validator"]["key"])
-        max_allowed_weights = int(config["subnet"]["max_allowed_weights"])
-        answers = [
-            {
-                "id": "1fa6f43c-73cc-401c-9544-763ea9799d51",
-                "created_at": "2024-08-06T01:31:54.847839+05:45",
-                "updated_at": "2024-08-06T01:31:54.847839+05:45",
-                "answer": "answer 1 of 1",
-                "question_id": "26e34ba9-4e0d-46ab-8f8e-820fce3f5e76",
-                "supporting_resources": {},
-                "miner": {
-                    "id": "f665a3e3-b9f5-40dd-b606-7905432c1253",
-                    "created_at": "2024-08-06T01:31:54.827930+05:45",
-                    "updated_at": "2024-08-06T01:31:54.827930+05:45",
-                    "user_address": "5FLbaLYazG4EnJdz2pw2ZEgaSYRfwQN7FqufcV4xtW1RVitm",
-                    "user_type": "miner",
-                    "module_id": 1,
-                },
-                "score": 0.5,
-            },
-            {
-                "id": "e6f4d4d9-0d2b-46d6-82fc-26ce7965233b",
-                "created_at": "2024-08-06T01:31:54.847839+05:45",
-                "updated_at": "2024-08-06T01:31:54.847839+05:45",
-                "answer": "answer 1 of 2",
-                "question_id": "1d990f08-77f7-4278-ae1c-5b1bb5232be7",
-                "supporting_resources": {},
-                "miner": {
-                    "id": "f665a3e3-b9f5-40dd-b606-7905432c1253",
-                    "created_at": "2024-08-06T01:31:54.827930+05:45",
-                    "updated_at": "2024-08-06T01:31:54.827930+05:45",
-                    "user_address": "5FLbaLYazG4EnJdz2pw2ZEgaSYRfwQN7FqufcV4xtW1RVitm",
-                    "user_type": "miner",
-                    "module_id": 1,
-                },
-                "score": 0.1,
-            },
-        ]
         score_dict = {}
         for answer in answers:
+            if len(answer["supporting_resources"]) == 0:
+                answer["score"] = 0
+            else:
+                result = get_result(answer, config)
+                logger.info({"result": result, "answer": answer})
+                answer["score"] = 1 if result["validation_result"] == "valid" else 0
             module_id = answer["miner"]["module_id"]
             if module_id not in score_dict:
                 score_dict[module_id] = {"score": 0}
             score_dict[answer["miner"]["module_id"]]["score"] += answer["score"]
-        numenex_module.set_weights(
-            score_dict=score_dict,
-            netuid=config["subnet"]["netuid"],
-            client=c_client,
-            key=keypair,
-            max_allowed_weights=max_allowed_weights,
-        )
+        numenex_module.set_weights(score_dict=score_dict)
         formatted_answer_validations = [
             {"id": answer["id"], "score": answer["score"]} for answer in answers
         ]
-        print(formatted_answer_validations)
         numenex_module.answer_questions(
-            method="patch", data=formatted_answer_validations, path="answers"
+            data=formatted_answer_validations, method="patch", path="answers"
         )
+        logger.info("Sleeping for %s seconds", config["validator"]["interval"])
+        time.sleep(int(config["validator"]["interval"]))
 
 
 if __name__ == "__main__":

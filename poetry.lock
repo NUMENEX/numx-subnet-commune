@@ -188,6 +188,27 @@ files = [
 tests = ["PyHamcrest (>=2.0.2)", "mypy", "pytest (>=4.6)", "pytest-benchmark", "pytest-cov", "pytest-flake8"]
 
 [[package]]
+name = "beautifulsoup4"
+version = "4.12.3"
+description = "Screen-scraping library"
+optional = false
+python-versions = ">=3.6.0"
+files = [
+    {file = "beautifulsoup4-4.12.3-py3-none-any.whl", hash = "sha256:b80878c9f40111313e55da8ba20bdba06d8fa3969fc68304167741bbf9e082ed"},
+    {file = "beautifulsoup4-4.12.3.tar.gz", hash = "sha256:74e3d1928edc070d21748185c46e3fb33490f22f52a3addee9aee0f4f7781051"},
+]
+
+[package.dependencies]
+soupsieve = ">1.2"
+
+[package.extras]
+cchardet = ["cchardet"]
+chardet = ["chardet"]
+charset-normalizer = ["charset-normalizer"]
+html5lib = ["html5lib"]
+lxml = ["lxml"]
+
+[[package]]
 name = "certifi"
 version = "2024.7.4"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -388,13 +409,13 @@ files = [
 
 [[package]]
 name = "communex"
-version = "0.1.32"
+version = "0.1.34.2"
 description = "A library for Commune network focused on simplicity"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "communex-0.1.32-py3-none-any.whl", hash = "sha256:2fd58704e2fcf3b4d7cea054aff65451deb098060f7220d3f33d7c182cf7e8d3"},
-    {file = "communex-0.1.32.tar.gz", hash = "sha256:13fbd8af1e99c2c68b52f16d058b25e86963716bfb78ff4aecaa18c60cb4b0a0"},
+    {file = "communex-0.1.34.2-py3-none-any.whl", hash = "sha256:a728ff587af63283b4fb3853f40b47f67686043a072529819418171470ed229b"},
+    {file = "communex-0.1.34.2.tar.gz", hash = "sha256:91b4073e6cef0c2b1d45482c1f29642da3ad67ca95c06492159d6a49a4d98fd6"},
 ]
 
 [package.dependencies]
@@ -1517,6 +1538,17 @@ files = [
 ]
 
 [[package]]
+name = "soupsieve"
+version = "2.6"
+description = "A modern CSS selector implementation for Beautiful Soup."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "soupsieve-2.6-py3-none-any.whl", hash = "sha256:e72c4ff06e4fb6e4b5a9f0f55fe6e81514581fca1515028625d0f299c602ccc9"},
+    {file = "soupsieve-2.6.tar.gz", hash = "sha256:e2e68417777af359ec65daac1057404a3c8a5455bb8abc36f1a9866ab1a51abb"},
+]
+
+[[package]]
 name = "starlette"
 version = "0.36.3"
 description = "The little ASGI library that shines."
@@ -1914,4 +1946,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "986d9afc6be38612536ed1e313edbfc00bb18246295c9712a27e739ccb905cec"
+content-hash = "f6d7d309f4f57e2ca5a75b48c68903c63c6f5a63e01c7a0d82a13dbb801c5c56"

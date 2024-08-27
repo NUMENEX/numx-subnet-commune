@@ -10,6 +10,7 @@ python = "^3.10"
 configparser = "^7.0.0"
 communex = "^0.1.32"
 loguru = "^0.7.2"
+beautifulsoup4 = "^4.12.3"
 
 
 [build-system]

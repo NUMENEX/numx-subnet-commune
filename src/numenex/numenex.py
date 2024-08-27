@@ -9,6 +9,12 @@ from pydantic import BaseModel
 import typing as ty
 import math
 from communex.client import CommuneClient
+from communex.module.module import Module, endpoint
+from fastapi.exceptions import HTTPException
+from communex._common import get_node_url
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Question(BaseModel):
@@ -20,6 +26,7 @@ class Question(BaseModel):
 
     class Config:
         from_attributes = True
+        arbitrary_types_allowed = True
 
 
 class Answer(BaseModel):
@@ -29,21 +36,47 @@ class Answer(BaseModel):
 
     class Config:
         from_attributes = True
+        arbitrary_types_allowed = True
 
 
-class NumenexQAModule:
+class NumenexQAModule(Module):
     def __init__(
         self,
         role: Role,
     ) -> None:
         self.role = role
         self.config = Config(role)[role.value]
+        self.keypair = classic_load_key(self.config["key"])
+        if role.value == "validator":
+            self.default_config = Config(role)
+            self.netuid = int(self.default_config["subnet"]["netuid"])
+            self.use_testnet = self.default_config["subnet"]["use_testnet"] == "True"
+            self.commune_client = CommuneClient(
+                get_node_url(use_testnet=self.use_testnet)
+            )
+            self.max_allowed_weights = int(
+                self.default_config["subnet"]["max_allowed_weights"]
+            )
 
-    def get_questions(self, path: str):
-        response = requests.get(f"{self.config['host']}:{self.config['port']}/{path}")
-        print(response.json())
+    @endpoint
+    def get_questions(self):
+        try:
+            response = requests.get(
+                f"{self.config['host']}:{self.config['port']}/questions/"
+            )
+            if response.status_code == 200:
+                return response.json()
+            else:
+                raise HTTPException(
+                    status_code=response.status_code, detail=response.text
+                )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=e)
 
-    def answer_questions(self, method: str, data: ty.List[Answer], path: str):
+    @endpoint
+    def answer_questions(
+        self, data: ty.List[Answer], method: str = "POST", path: str = "answers"
+    ):
         key_pair = classic_load_key(self.config["key"])
         nonce = datetime.now().timestamp() * 1000
         address = key_pair.ss58_address
@@ -56,43 +89,51 @@ class NumenexQAModule:
         try:
             if method == "post":
                 response = requests.post(
-                    f"{self.config['host']}:{self.config['port']}/{path}",
+                    f"{self.config['host']}:{self.config['port']}/{path}/",
                     headers=headers,
                     json=data,
                 )
             else:
                 response = requests.patch(
-                    f"{self.config['host']}:{self.config['port']}/{path}",
+                    f"{self.config['host']}:{self.config['port']}/{path}/",
                     headers=headers,
                     json=data,
                 )
-            print(response.json())
             if response.status_code == 200:
                 return response.json()
             else:
-                return []
+                raise HTTPException(
+                    status_code=response.status_code, detail=response.text
+                )
         except Exception as e:
-            print(e)
-            return []
+            raise HTTPException(status_code=500, detail=e)
 
-    def get_answers(self, path: str):
-        response = requests.get(f"{self.config['host']}:{self.config['port']}/{path}")
-        print(response.json())
+    @endpoint
+    def get_answers(self, path: str = "answers"):
+        try:
+            response = requests.get(
+                f"{self.config['host']}:{self.config['port']}/{path}"
+            )
+            if response.status_code == 200:
+                return response.json()
+            else:
+                raise HTTPException(
+                    status_code=response.status_code, detail=response.text
+                )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=e)
 
-    def set_weights(
-        self,
-        score_dict: dict[int, ty.Union[str, float]],
-        netuid: int,
-        client: CommuneClient,
-        key: Keypair,
-        max_allowed_weights: int,
-    ) -> None:
+    def set_weights(self, score_dict: dict[int, ty.Union[str, float]]) -> None:
 
-        score_dict = self.cut_to_max_allowed_weights(score_dict, max_allowed_weights)
+        score_dict = self.cut_to_max_allowed_weights(
+            score_dict, self.max_allowed_weights
+        )
         weighted_scores: dict[int, int] = {}
 
         scores = sum(value["score"] for value in score_dict.values())
-
+        if scores == 0:
+            logger.info("All miners scored 0")
+            return
         # process the scores into weights of type dict[int, int]
         # Iterate over the items in the score_dict
         for uid, score_data in score_dict.items():
@@ -110,8 +151,10 @@ class NumenexQAModule:
         # send the blockchain call
         print(f"weights for the following uids: {uids}")
         if len(uids) > 0:
-            receit = client.vote(key=key, uids=uids, weights=weights, netuid=netuid)
-            print(receit)
+            receit = self.commune_client.vote(
+                key=self.keypair, uids=uids, weights=weights, netuid=self.netuid
+            )
+            print(receit.is_success)
 
     def cut_to_max_allowed_weights(
         self, score_dict: dict[int, float], max_allowed_weights: int

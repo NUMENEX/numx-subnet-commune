@@ -1,0 +1,4 @@
+{
+  "python.analysis.extraPaths": ["${workspaceFolder}/src/numenex/validator"],
+  "python.autoComplete.extraPaths": ["${workspaceFolder}/src/numenex/validator"]
+}
