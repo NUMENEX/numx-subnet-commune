@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "numx-subnet"
+name = "numx-subnet-prod-v1"
 version = "0.1.0"
 description = ""
 authors = ["NUMENEX"]
@@ -11,6 +11,10 @@ configparser = "^7.0.0"
 communex = "^0.1.32"
 loguru = "^0.7.2"
 beautifulsoup4 = "^4.12.3"
+langchain-openai = "^0.1.23"
+langchain = "^0.2.15"
+langchain-community = "^0.2.13"
+tldextract = "^5.1.2"
 
 
 [build-system]

@@ -1,5 +1,4 @@
 import requests
-from substrateinterface import Keypair
 from datetime import datetime
 from .utils import sign_message
 from communex.compat.key import classic_load_key

@@ -18,7 +18,6 @@ def get_result(
         config["llm_validator"]["openai_timeout"],
         config["llm_validator"]["openai_max_retries"],
     )
-    print(config["llm_validator"])
     for url in miner_submission["supporting_resources"].values():
         if not get_website_metadata(url, config["llm_validator"]["api_ninja_api_key"]):
             return {

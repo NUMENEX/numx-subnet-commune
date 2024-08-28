@@ -1,4 +1,4 @@
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 import os
 
 
@@ -9,9 +9,9 @@ def get_llm(
     max_tokens: int,
     timeout: int,
     max_retries: int,
-) -> ChatGroq:
-    os.environ["GROQ_API_KEY"] = api_key
-    return ChatGroq(
+) -> ChatOpenAI:
+    os.environ["OPENAI_API_KEY"] = api_key
+    return ChatOpenAI(
         model=model,
         temperature=int(temperature),
         max_tokens=int(max_tokens) if max_tokens != "None" else None,

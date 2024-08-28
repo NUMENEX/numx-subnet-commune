@@ -42,6 +42,9 @@ Create `config.ini` file from `config.ini.example` with your actual key name
 To run Miner, make sure you have completed the above steps from `1 to 5`
 1. **Using User Interface:**
     ```bash
+    poetry shell
+    ```
+    ```bash
     poetry run python -m src.numenex.miner.numx
     ```
     After you have verified the server is running, please go [Here](https://github.com/NUMENEX/QA-UI) and you can start mining using our basic UI.
@@ -55,6 +58,9 @@ To run Validator, make sure you have completed the above steps from `1 to 5`
 1. Get `OpenAi Api key and api ninja api key` and update it in `config.ini` file
 
 2. ```bash
+    poetry shell
+    ```
+    ```bash
     poetry run python -m src.numenex.validator.numx
     ```
 
