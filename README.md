@@ -52,6 +52,11 @@ To run Miner, make sure you have completed the above steps from `1 to 5`
 2. **Using CLI:**
     Checkout to feat/initial_phase and follow it's readme or go [Here](https://github.com/NUMENEX/numx-subnet-commune/tree/feat/initial_phase) and follow Readme file
 
+**Note For Miners**
+1. Please provide valid website links that are not paywalled. If you do not provide webpage links, you will not be rewarded
+2. Use website that is at least 1 year old
+3. Do not use paywalled or blogpost websites
+
 ## Running Validator
 
 To run Validator, make sure you have completed the above steps from `1 to 5`
