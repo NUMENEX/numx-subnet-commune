@@ -85,6 +85,7 @@ To run Validator, make sure you have completed the above steps from `1 to 5`
     ```
     - Using [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/)
         - Run using config file
+        Update config file before running below commands
         ```bash
         pm2 start ./ecosystem.config.js
         ```
