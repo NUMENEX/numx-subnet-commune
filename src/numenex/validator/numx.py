@@ -29,24 +29,27 @@ def main():
         answers = numenex_module.get_answers(path="answers")
         config = Config(Role.Validator)
         score_dict = {}
-        for answer in answers:
-            if len(answer["supporting_resources"]) == 0:
-                answer["score"] = 0
-            else:
-                result = get_result(answer, config)
-                logger.info({"result": result, "answer": answer})
-                answer["score"] = 1 if result["validation_result"] == "valid" else 0
-            module_id = answer["miner"]["module_id"]
-            if module_id not in score_dict:
-                score_dict[module_id] = {"score": 0}
-            score_dict[answer["miner"]["module_id"]]["score"] += answer["score"]
-        numenex_module.set_weights(score_dict=score_dict)
-        formatted_answer_validations = [
-            {"id": answer["id"], "score": answer["score"]} for answer in answers
-        ]
-        numenex_module.answer_questions(
-            data=formatted_answer_validations, method="patch", path="answers"
-        )
+        if len(answers) == 0:
+            logger.info("No Miners to validate")
+        else:
+            for answer in answers:
+                if len(answer["supporting_resources"]) == 0:
+                    answer["score"] = 0
+                else:
+                    result = get_result(answer, config)
+                    logger.info({"result": result, "answer": answer})
+                    answer["score"] = 1 if result["validation_result"] == "valid" else 0
+                module_id = answer["miner"]["module_id"]
+                if module_id not in score_dict:
+                    score_dict[module_id] = {"score": 0}
+                score_dict[answer["miner"]["module_id"]]["score"] += answer["score"]
+            numenex_module.set_weights(score_dict=score_dict)
+            formatted_answer_validations = [
+                {"id": answer["id"], "score": answer["score"]} for answer in answers
+            ]
+            numenex_module.answer_questions(
+                data=formatted_answer_validations, method="patch", path="answers"
+            )
         logger.info("Sleeping for %s seconds", config["validator"]["interval"])
         time.sleep(int(config["validator"]["interval"]))
 
