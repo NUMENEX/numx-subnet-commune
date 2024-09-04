@@ -24,6 +24,7 @@ def get_result(
                 "validation_result": "invalid",
                 "justification": "The website is not reliable",
                 "reference_snippet": "",
+                "score": 0.0,
             }
     docs = get_website_contents(miner_submission["supporting_resources"].values())
     chain = final_prompt | llm

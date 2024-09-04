@@ -12,6 +12,7 @@ examples = [
         "validation_result": "valid",
         "justification": "The source explicitly states that George Washington was the first President of the United States.",
         "reference_snippet": """George Washington (February 22, 1732 – December 14, 1799) was an American Founding Father, politician, military officer, and farmer who served as the first president of the United States from 1789 to 1797. Appointed by the Second Continental Congress as commander of the Continental Army in 1775, Washington led Patriot forces to victory in the American Revolutionary War and then served as president of the Constitutional Convention in 1787, which drafted the current Constitution of the United States. Washington has thus become commonly known as the "Father of his Country".""",
+        "score": "0.5",
     },
     {
         "question": "What is the capital of France?",
@@ -21,6 +22,7 @@ examples = [
         "validation_result": "invalid",
         "justification": "The source clearly states that Paris is the capital of France, contradicting the miner's selected answer of London.",
         "reference_snippet": "",
+        "score": "0.0",
     },
 ]
 
@@ -32,7 +34,7 @@ example_prompt = ChatPromptTemplate.from_messages(
         ),
         (
             "ai",
-            """{{"validation_result":"{validation_result}","justification":"{justification}","reference_snippet":"{reference_snippet}"}}""",
+            """{{"validation_result":"{validation_result}","justification":"{justification}","score":"{score}","reference_snippet":"{reference_snippet}"}}""",
         ),
     ]
 )
@@ -50,10 +52,11 @@ def get_final_prompt():
                 """
             You are a helpful assistant tasked with evaluating the validity of answers based on provided source content and questions. Your responsibilities include:
             1. Verifying if the selected answer aligns with the source content in relation to the question asked.
-            2. If the answer is valid, state "valid" and provide a justification.
-            3. If the answer is invalid, state "invalid" and provide a justification.
+            2. If the answer is valid, state "valid" and provide a short justification.
+            3. If the answer is invalid, state "invalid" and provide a short justification.
             4. Apply strict criteria when determining validity, treating typos as invalid answers.
-            5. Ensure the "reference_snippet" includes the relevant portion of the source content that supports your validation.
+            5. Ensure the short "reference_snippet" includes the relevant portion of the source content that supports your validation.
+            6. Include the "score" based on the validity of the answer and resources contents.
             """,
             ),
             few_shot_prompt,

@@ -38,7 +38,7 @@ def main():
                 else:
                     result = get_result(answer, config)
                     logger.info({"result": result, "answer": answer})
-                    answer["score"] = 1 if result["validation_result"] == "valid" else 0
+                    answer["score"] = float(result["score"])
                 module_id = answer["miner"]["module_id"]
                 if module_id not in score_dict:
                     score_dict[module_id] = {"score": 0}

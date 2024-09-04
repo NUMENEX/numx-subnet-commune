@@ -942,6 +942,25 @@ docs = ["Sphinx", "furo"]
 test = ["objgraph", "psutil"]
 
 [[package]]
+name = "groq"
+version = "0.11.0"
+description = "The official Python library for the groq API"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "groq-0.11.0-py3-none-any.whl", hash = "sha256:e328531c979542e563668c62260aec13b43a6ee0ca9e2fb22dff1d26f8c8ce54"},
+    {file = "groq-0.11.0.tar.gz", hash = "sha256:dbb9aefedf388ddd4801ec7bf3eba7f5edb67948fec0cd2829d97244059f42a7"},
+]
+
+[package.dependencies]
+anyio = ">=3.5.0,<5"
+distro = ">=1.7.0,<2"
+httpx = ">=0.23.0,<1"
+pydantic = ">=1.9.0,<3"
+sniffio = "*"
+typing-extensions = ">=4.7,<5"
+
+[[package]]
 name = "h11"
 version = "0.14.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -1190,6 +1209,21 @@ pydantic = [
 PyYAML = ">=5.3"
 tenacity = ">=8.1.0,<8.4.0 || >8.4.0,<9.0.0"
 typing-extensions = ">=4.7"
+
+[[package]]
+name = "langchain-groq"
+version = "0.1.9"
+description = "An integration package connecting Groq and LangChain"
+optional = false
+python-versions = "<4.0,>=3.8.1"
+files = [
+    {file = "langchain_groq-0.1.9-py3-none-any.whl", hash = "sha256:632ba94bc05de2217f0dfd37be5892faa49eca6afdfe577926447024a96eef80"},
+    {file = "langchain_groq-0.1.9.tar.gz", hash = "sha256:0f28a4df00e8d58b024fd83dc338795baf439769d582de5cced48951aa00bbce"},
+]
+
+[package.dependencies]
+groq = ">=0.4.1,<1"
+langchain-core = ">=0.2.26,<0.3.0"
 
 [[package]]
 name = "langchain-openai"
@@ -2934,4 +2968,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d52726a914034b8bb80ef3db005787e0222a4e9409b837547bb7cdd443f7e2d3"
+content-hash = "71485a47ad46851bba9a9cba71f0b396dfda8bf2dddb8f7c6254e57b7b8016b4"
