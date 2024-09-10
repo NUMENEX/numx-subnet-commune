@@ -5,7 +5,7 @@ port=443
 
 [validator]
 key_name = test_validator [validator key name in ~/.commune/key/]
-interval = 300
+interval = 43200
 host=https://backend.numenex.com
 port=443
 
