@@ -91,10 +91,11 @@ def main():
                         "module_id": answer["miner"]["module_id"],
                     }
                 )
-            save_validated_answers(processed_answers)
             numenex_module.set_weights(score_dict=score_dict)
+            save_validated_answers(processed_answers)
             formatted_answer_validations = [
-                {"id": answer["id"], "score": answer["score"]} for answer in answers
+                {"id": answer["id"], "score": answer["score"]}
+                for answer in unprocessed_answers
             ]
             numenex_module.answer_questions(
                 data=formatted_answer_validations, method="patch", path="answers"
