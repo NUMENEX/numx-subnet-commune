@@ -5,7 +5,7 @@ from typing import Annotated
 from communex._common import get_node_url
 from communex.client import CommuneClient
 from communex.compat.key import classic_load_key
-from .validator.validator import NumxValidator
+from .validator.numx import NumxValidator
 from .settings import Config, Role
 from .numenex import NumenexQAModule
 

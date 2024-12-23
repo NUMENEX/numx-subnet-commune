@@ -4,11 +4,13 @@ import time
 from .miner_verifier.main import get_result
 import os
 import json
+import re
 
 import logging
 from logging.handlers import RotatingFileHandler
 
 ANSWER_JSON = "validated_answers.json"
+IP_REGEX = re.compile(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -41,19 +43,23 @@ def save_validated_answers(processed_answers):
         json.dump(list(processed_answers), f)
 
 
-def get_unprocessed_answers(answers):
+def get_unprocessed_answers(answers, swapped_modules_keys):
     processed_answers = load_validated_answers()
     unprocessed_answers = []
-    processed_answers_ids = {answer["id"] for answer in processed_answers}
+    processed_answers_ids = {
+        answer["id"]: answer["score"] for answer in processed_answers
+    }
     score_dict = {}
     for answer in answers:
         answer_id = answer["id"]
-        module_id = answer["miner"]["module_id"]
+        module_id = swapped_modules_keys[answer["miner"]["user_address"]]
+        if not module_id:
+            continue
         if answer_id in processed_answers_ids:
             if module_id not in score_dict:
-                score_dict[module_id] = {"score": processed_answers[module_id]["score"]}
+                score_dict[module_id] = {"score": processed_answers_ids[answer_id]}
             else:
-                score_dict[module_id]["score"] += processed_answers[module_id]["score"]
+                score_dict[module_id]["score"] += processed_answers_ids[answer_id]
             logger.info(f"Skipping already answer item with id: {answer_id}")
             continue
         unprocessed_answers.append(answer)
@@ -61,13 +67,23 @@ def get_unprocessed_answers(answers):
     return processed_answers, unprocessed_answers, score_dict
 
 
+def extract_address(string: str):
+    return re.search(IP_REGEX, string)
+
+
 def main():
     logger.info("Validator started")
+    numenex_module = NumenexQAModule(role=Role.Validator)
+    modules_keys = numenex_module.commune_client.query_map_key(numenex_module.netuid)
+    swapped_modules_keys = {value: key for key, value in modules_keys.items()}
+    if numenex_module.keypair.ss58_address not in modules_keys.values():
+        raise RuntimeError(
+            f"validator key {numenex_module.keypair.ss58_address} is not registered in subnet"
+        )
     while True:
-        numenex_module = NumenexQAModule(role=Role.Validator)
         answers = numenex_module.get_answers(path="answers")
         processed_answers, unprocessed_answers, score_dict = get_unprocessed_answers(
-            answers
+            answers, swapped_modules_keys
         )
         config = Config(Role.Validator)
         if len(answers) == 0:
@@ -80,10 +96,15 @@ def main():
                     result = get_result(answer, config)
                     logger.info({"result": result, "answer": answer})
                     answer["score"] = float(result["score"])
-                module_id = answer["miner"]["module_id"]
+                module_id = swapped_modules_keys[answer["miner"]["user_address"]]
+                if not module_id:
+                    logger.error(
+                        f"Could not find module_id for user_address: {answer['miner']['user_address']}"
+                    )
+                    continue
                 if module_id not in score_dict:
                     score_dict[module_id] = {"score": 0}
-                score_dict[answer["miner"]["module_id"]]["score"] += answer["score"]
+                score_dict[module_id]["score"] += answer["score"]
                 processed_answers.append(
                     {
                         "id": answer["id"],
