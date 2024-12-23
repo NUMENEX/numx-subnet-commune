@@ -52,7 +52,13 @@ def get_unprocessed_answers(answers, swapped_modules_keys):
     score_dict = {}
     for answer in answers:
         answer_id = answer["id"]
-        module_id = swapped_modules_keys[answer["miner"]["user_address"]]
+        try:
+            module_id = swapped_modules_keys[answer["miner"]["user_address"]]
+        except KeyError:
+            logger.error(
+                f"Could not find module_id for user_address: {answer['miner']['user_address']}"
+            )
+            continue
         if not module_id:
             continue
         if answer_id in processed_answers_ids:
