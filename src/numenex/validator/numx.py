@@ -99,9 +99,13 @@ def main():
                 if len(answer["supporting_resources"]) == 0:
                     answer["score"] = 0
                 else:
-                    result = get_result(answer, config)
-                    logger.info({"result": result, "answer": answer})
-                    answer["score"] = float(result["score"])
+                    try:
+                        result = get_result(answer, config)
+                        logger.info({"result": result, "answer": answer})
+                        answer["score"] = float(result["score"])
+                    except Exception:
+                        logger.error("Error while validating answer", exc_info=True)
+                        continue
                 module_id = swapped_modules_keys[answer["miner"]["user_address"]]
                 if not module_id:
                     logger.error(
@@ -118,8 +122,8 @@ def main():
                         "module_id": answer["miner"]["module_id"],
                     }
                 )
-            numenex_module.set_weights(score_dict=score_dict)
             save_validated_answers(processed_answers)
+            numenex_module.set_weights(score_dict=score_dict)
             formatted_answer_validations = [
                 {"id": answer["id"], "score": answer["score"]}
                 for answer in unprocessed_answers
