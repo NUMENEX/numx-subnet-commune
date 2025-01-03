@@ -129,6 +129,7 @@ def main():
                 logger.info("No Miners to validate")
             else:
                 for answer in unprocessed_answers:
+                    module_id = swapped_modules_keys[answer["miner"]["user_address"]]
                     if len(answer["supporting_resources"]) == 0:
                         answer["score"] = 0
                     else:
@@ -137,9 +138,17 @@ def main():
                             logger.info({"result": result, "answer": answer})
                             answer["score"] = float(result["score"])
                         except Exception:
+                            answer["score"] = 0
                             logger.error("Error while validating answer", exc_info=True)
-                            continue
-                    module_id = swapped_modules_keys[answer["miner"]["user_address"]]
+                            if module_id:
+                                processed_answers.append(
+                                    {
+                                        "id": answer["id"],
+                                        "score": answer["score"],
+                                        "module_id": answer["miner"]["module_id"],
+                                    }
+                                )
+                                continue
                     if not module_id:
                         logger.error(
                             f"Could not find module_id for user_address: {answer['miner']['user_address']}"
@@ -164,10 +173,10 @@ def main():
                 numenex_module.answer_questions(
                     data=formatted_answer_validations, method="patch", path="answers"
                 )
-            logger.info("Sleeping for %s seconds", config["validator"]["interval"])
-            time.sleep(int(config["validator"]["interval"]))
         except Exception as e:
             logger.critical(f"Error in running vali {e}", exc_info=True)
+        logger.info("Sleeping for %s seconds", config["validator"]["interval"])
+        time.sleep(int(config["validator"]["interval"]))
 
 
 if __name__ == "__main__":
